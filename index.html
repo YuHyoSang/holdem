@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>홀덤 퀴즈</title>
+<meta name="theme-color" content="#0b4730">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="홀덤 퀴즈">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+/* VOICE: 카드룸의 딜러처럼 짧고 분명하게
+   IDEA: 펠트 테이블 위에 카드가 깔리고 칩 버튼으로 답한다
+   PICTURE: 문제마다 실제 카드가 테이블에 놓인 모습
+   COLOUR and TYPE: 펠트 그린 바탕, 흰 카드, 칩 레드 강조 / 시스템 한글 산세리프
+   LAYOUT: 한 손 세로 화면, 위 점수판, 가운데 테이블, 아래 답 버튼 */
+:root{--felt:#0f5a3c;--felt2:#0b4730;--rail:#08331f;--ink:#f3f6f1;--mute:#b9cfc1;--card:#fffdf8;--red:#d23a3a;--blk:#1b1b1b;--ok:#3fcf7a;--bad:#ee5a5a;--gold:#f3c44f}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html{background:#0b4730}html,body{margin:0;min-height:100%}
+body{background:radial-gradient(120% 80% at 50% 30%,var(--felt),var(--felt2) 70%,var(--rail)) fixed;color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;overflow-x:clip;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button{touch-action:manipulation}
+.wrap{max-width:720px;margin:0 auto;padding:12px 14px 28px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h1{font-size:24px;line-height:1.05;margin:0;font-weight:900;letter-spacing:-.5px}
+h1 span{color:var(--gold)}
+.modes{display:flex;gap:4px;background:rgba(0,0,0,.25);border-radius:999px;padding:4px}
+h1{margin-right:auto!important}
+.modes button{border:0;background:none;color:var(--mute);font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:999px;min-height:36px}
+.modes button.on{background:var(--ink);color:var(--felt2)}
+.score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.score div{background:rgba(0,0,0,.22);border-radius:12px;padding:6px 8px;text-align:center}
+.score b{display:block;font-size:20px;line-height:1.2;font-variant-numeric:tabular-nums}
+.score small{font-size:12px;color:var(--mute)}
+.table{background:rgba(0,0,0,.18);border:2px solid rgba(255,255,255,.08);border-radius:22px;padding:14px;box-shadow:inset 0 2px 18px rgba(0,0,0,.35)}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--gold);color:#3a2a00}
+.tag.p{background:#8fd3ff;color:#06314a}
+.q{font-size:17px;font-weight:700;margin:10px 0 4px;white-space:pre-line}
+.groups{display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:center;margin-top:10px}
+.grp{text-align:center}
+.grp>small{display:block;font-size:13px;color:var(--mute);margin-bottom:4px}
+.cards{display:flex;gap:5px;justify-content:center}
+.c{background:var(--card);color:var(--blk);position:relative;box-shadow:0 3px 0 rgba(0,0,0,.25),0 6px 12px rgba(0,0,0,.25);font-weight:800}
+.c.r{color:var(--red)}
+.c b{position:absolute;line-height:1.1}
+.c i{position:absolute;bottom:0;font-style:normal;line-height:1.1}
+.c.hl{outline:3px solid var(--gold);outline-offset:1px}
+.c.in{animation:deal .25s ease-out both}
+@keyframes deal{from{transform:translateY(-14px) rotate(-6deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.c.in{animation:none}}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.choices.one{grid-template-columns:minmax(0,1fr)}
+.ch{font:inherit;font-size:16px;font-weight:700;min-height:54px;border-radius:14px;border:2px solid transparent;background:var(--ink);color:#12301f;padding:8px 10px;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.ch:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.3)}
+.ch.ok{background:var(--ok);color:#06210f}
+.ch.bad{background:var(--bad);color:#fff}
+.ch.dim{opacity:.45}
+.ch.sel{outline:4px solid var(--gold);outline-offset:2px}
+.vbtn{font:inherit;font-size:14px;font-weight:800;border:2px solid rgba(255,255,255,.35);background:none;color:var(--ink);border-radius:999px;padding:7px 14px;min-height:40px}
+.vbtn.on{background:var(--gold);border-color:var(--gold);color:#3a2a00}
+.mic{display:none;align-items:center;gap:10px;background:rgba(0,0,0,.25);border-radius:14px;padding:8px 10px 8px 14px;font-size:15px}
+.mic.show{display:flex}
+.mic #micTxt{flex:1}
+.mic button{font:inherit;font-weight:800;font-size:15px;border:0;border-radius:10px;background:var(--ink);color:#12301f;padding:8px 16px;min-height:44px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--mute);flex:none}
+.dot.listen{background:#ff5a5a;animation:pulse 1s infinite}.dot.talk{background:#8fd3ff}
+@keyframes pulse{50%{transform:scale(1.5);opacity:.6}}
+@media (prefers-reduced-motion:reduce){.dot.listen{animation:none}}
+
+.ch:disabled{cursor:default}
+.fb{background:var(--card);color:#1d2a22;border-radius:16px;padding:12px 14px;display:none}
+.fb.show{display:block}
+.fb h2{font-size:18px;margin:0 0 6px}
+.fb h2.ok{color:#178a46}.fb h2.bad{color:#c22d2d}
+.fb p{margin:0;white-space:pre-line;font-size:15px}
+.fb .cs{font-weight:800}
+.fb .cs .r{color:var(--red)}
+.next{font:inherit;font-weight:800;font-size:17px;min-height:54px;border:0;border-radius:14px;background:var(--gold);color:#3a2a00;display:none;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.next.show{display:block}
+.play,.side{display:flex;flex-direction:column;gap:12px}
+.foot{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mute);gap:8px;flex-wrap:wrap}
+.foot button{font:inherit;font-size:13px;background:none;border:1px solid rgba(255,255,255,.3);color:var(--mute);border-radius:999px;padding:6px 12px;min-height:34px}
+.foot .ver{opacity:.7}
+/* 카드 크기는 화면 폭에 비례 (--cw = 카드 너비) */
+:root{--cw:46px}
+@media (max-width:380px){:root{--cw:40px}.groups{gap:8px 12px}}
+.c{width:var(--cw);height:calc(var(--cw)*1.43);border-radius:calc(var(--cw)*.14)}
+.c b{font-size:calc(var(--cw)*.37);left:calc(var(--cw)*.1);top:calc(var(--cw)*.04)}
+.c i{font-size:calc(var(--cw)*.56);right:calc(var(--cw)*.08)}
+.cards{gap:calc(var(--cw)*.1)}
+/* 태블릿 세로: 전부 화면 폭에 맞춰 키움 */
+@media (min-width:560px) and (orientation:portrait){
+ :root{--cw:clamp(64px,16vw,180px)}
+ .groups.g3 .grp:nth-child(2){order:3;flex-basis:100%}
+ .wrap{max-width:1100px;padding:clamp(16px,3vw,36px);gap:clamp(12px,2vw,22px)}
+ h1{font-size:clamp(28px,5vw,48px)}
+ .modes button,.vbtn{font-size:clamp(16px,2.4vw,24px);padding:.45em 1.1em;min-height:clamp(44px,6vw,64px)}
+ .score b{font-size:clamp(24px,4.2vw,44px)}.score small{font-size:clamp(13px,1.9vw,19px)}
+ .table{padding:clamp(18px,3vw,34px)}
+ .tag{font-size:clamp(14px,2.1vw,21px);padding:.25em .9em}
+ .q{font-size:clamp(20px,3.4vw,34px);margin-top:.6em}
+ .groups{gap:clamp(14px,2.4vw,28px) clamp(24px,4vw,48px);margin-top:clamp(14px,2.4vw,28px)}
+ .grp>small{font-size:clamp(14px,2.1vw,21px);margin-bottom:.4em}
+ .c.hl{outline-width:5px;outline-offset:2px}
+ .ch{font-size:clamp(18px,3vw,30px);min-height:clamp(64px,9vw,100px);border-radius:18px}
+ .choices{gap:clamp(10px,1.6vw,18px)}
+ .mic{font-size:clamp(16px,2.4vw,24px)}.mic button{font-size:inherit;min-height:clamp(44px,6vw,60px)}
+ .fb{padding:clamp(16px,2.6vw,30px)}.fb h2{font-size:clamp(20px,3.2vw,32px)}.fb p{font-size:clamp(17px,2.5vw,26px)}
+ .next{font-size:clamp(19px,3vw,30px);min-height:clamp(62px,8.5vw,96px)}
+ .foot,.foot button{font-size:clamp(13px,1.9vw,19px)}
+}
+/* 태블릿 가로 (v1.1 그대로) */
+@media (min-width:700px) and (orientation:landscape){
+ :root{--cw:70px}
+ .wrap{max-width:980px;padding:20px 28px 36px;gap:16px}
+ h1{font-size:34px}
+ .modes button{font-size:17px;padding:10px 22px;min-height:44px}
+ .vbtn{font-size:17px;padding:10px 20px;min-height:44px}.mic{font-size:18px}
+ .score b{font-size:28px}.score small{font-size:14px}
+ .table{padding:22px 24px}
+ .tag{font-size:15px;padding:4px 14px}
+ .q{font-size:22px;margin-top:14px}
+ .groups{gap:16px 34px;margin-top:18px}
+ .grp>small{font-size:15px}
+ .cards{gap:8px}
+ .ch{font-size:20px;min-height:68px;border-radius:16px}
+ .choices{gap:12px}
+ .fb{padding:18px 22px}.fb h2{font-size:22px}.fb p{font-size:18px}
+ .next{font-size:20px;min-height:66px}
+ .foot{font-size:15px}
+}
+@media (min-width:1000px) and (orientation:landscape){
+ .wrap{max-width:1400px}
+ .play{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}
+ .table{position:sticky;top:16px}
+ .choices{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>홀덤 <span>퀴즈</span></h1>
+    <button class="vbtn" id="voiceBtn" hidden>음성 모드</button>
+    <div class="modes" id="modes">
+      <button data-m="all" class="on">전체</button>
+      <button data-m="basic">기초</button>
+      <button data-m="prob">확률</button>
+    </div>
+  </header>
+  <div class="score">
+    <div><b id="sScore">0/0</b><small>정답</small></div>
+    <div><b id="sRate">-</b><small>정답률</small></div>
+    <div><b id="sStreak">0</b><small>연속</small></div>
+    <div><b id="sBest">0</b><small>최고 연속</small></div>
+  </div>
+  <div class="play">
+  <section class="table">
+    <span class="tag" id="tag"></span>
+    <div class="q" id="prompt"></div>
+    <div class="groups" id="groups"></div>
+  </section>
+  <div class="side">
+  <div class="choices" id="choices"></div>
+  <div class="mic" id="mic"><span class="dot" id="micDot"></span><span id="micTxt">음성 모드</span><button id="micBtn">말하기</button></div>
+  <div class="fb" id="fb"><h2 id="fbTitle"></h2><p id="fbText"></p></div>
+  <button class="next" id="next">다음 문제</button>
+  </div>
+  </div>
+  <div class="foot"><span id="kindStat"></span><span class="ver">v1.3</span><button id="reset">점수 초기화</button></div>
+</div>
+<script>
+{
+//ENGINE-START
+const RK='23456789TJQKA', SU=['♠','♥','♦','♣'];
+const CAT=['하이카드','원 페어','투 페어','트리플','스트레이트','플러시','풀 하우스','포카드','스트레이트 플러시','로열 플러시'];
+const rn=r=>r===8?'10':RK[r];
+const ct=c=>rn(c>>2)+SU[c&3];
+const isRed=c=>(c&3)===1||(c&3)===2;
+const rnd=n=>Math.floor(Math.random()*n);
+const pick=a=>a[rnd(a.length)];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function deck(ex){const s=new Set(ex||[]);const d=[];for(let c=0;c<52;c++)if(!s.has(c))d.push(c);return d}
+function draw(n,ex){return shuffle(deck(ex)).slice(0,n)}
+function comb(n,k){if(k<0||k>n)return 0;let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return Math.round(r)}
+function hiStraight(m){for(let h=12;h>=3;h--){let ok=true;for(let k=0;k<5;k++){const r=h-k<0?12:h-k;if(!((m>>r)&1)){ok=false;break}}if(ok)return h}return -1}
+function ev(cs){
+  const rc=new Array(13).fill(0),sr=[[],[],[],[]];let m=0;
+  for(const c of cs){const r=c>>2;rc[r]++;sr[c&3].push(r);m|=1<<r}
+  const mk=(cat,k)=>{let s=cat;for(let i=0;i<5;i++)s=s*16+(k[i]===undefined?0:k[i]);return{s,cat,k}};
+  const fl=sr.find(a=>a.length>=5);
+  if(fl){let fm=0;for(const r of fl)fm|=1<<r;const h=hiStraight(fm);if(h>=0)return mk(8,[h])}
+  const by=n=>{const o=[];for(let r=12;r>=0;r--)if(rc[r]===n)o.push(r);return o};
+  const q=by(4),t=by(3),p=by(2),desc=[];
+  for(let r=12;r>=0;r--)if(rc[r])desc.push(r);
+  const kick=(ex,n)=>desc.filter(r=>!ex.includes(r)).slice(0,n);
+  if(q.length)return mk(7,[q[0],...kick([q[0]],1)]);
+  if(t.length&&(t.length>1||p.length))return mk(6,[t[0],Math.max(t.length>1?t[1]:-1,p.length?p[0]:-1)]);
+  if(fl)return mk(5,fl.slice().sort((a,b)=>b-a).slice(0,5));
+  const h=hiStraight(m);if(h>=0)return mk(4,[h]);
+  if(t.length)return mk(3,[t[0],...kick([t[0]],2)]);
+  if(p.length>=2)return mk(2,[p[0],p[1],...kick([p[0],p[1]],1)]);
+  if(p.length)return mk(1,[p[0],...kick([p[0]],3)]);
+  return mk(0,desc.slice(0,5));
+}
+const catIdx=e=>e.cat===8&&e.k[0]===12?9:e.cat;
+function desc(e){
+  const k=e.k;
+  switch(e.cat){
+    case 8:return k[0]===12?'로열 플러시':rn(k[0])+' 하이 스트레이트 플러시';
+    case 7:return rn(k[0])+' 포카드 (키커 '+rn(k[1])+')';
+    case 6:return '풀 하우스 ('+rn(k[0])+' 트리플 + '+rn(k[1])+' 페어)';
+    case 5:return rn(k[0])+' 하이 플러시 ('+k.map(rn).join('-')+')';
+    case 4:return k[0]===3?'5 하이 스트레이트 (A-2-3-4-5)':rn(k[0])+' 하이 스트레이트';
+    case 3:return rn(k[0])+' 트리플 (키커 '+rn(k[1])+', '+rn(k[2])+')';
+    case 2:return '투 페어 '+rn(k[0])+'·'+rn(k[1])+' (키커 '+rn(k[2])+')';
+    case 1:return rn(k[0])+' 원 페어 (키커 '+k.slice(1,4).map(rn).join(', ')+')';
+    default:return '하이카드 ('+k.map(rn).join('-')+')';
+  }
+}
+function best5(cs){
+  const e=ev(cs),n=cs.length;if(n<=5)return cs.slice();
+  for(let a=0;a<n;a++)for(let b=a+1;b<n;b++)for(let c=b+1;c<n;c++)for(let d=c+1;d<n;d++)for(let f=d+1;f<n;f++){
+    const s=[cs[a],cs[b],cs[c],cs[d],cs[f]];if(ev(s).s===e.s)return s}
+  return cs.slice(0,5);
+}
+const pct=x=>(x*100).toFixed(x<0.01?2:1)+'%';
+function mc(q,correct,wrongs){
+  const l=[correct];for(const w of wrongs)if(!l.includes(w)&&l.length<4)l.push(w);
+  shuffle(l);q.choices=l;q.answer=l.indexOf(correct);return q;
+}
+function nearInts(c,lo){const s=[];for(const o of shuffle([-4,-3,-2,-1,1,2,3,4,5]))
+  {const v=c+o;if(v>=lo&&!s.includes(v))s.push(v);if(s.length===3)break}return s.map(String)}
+function pctQ(q,c,cands,gap){
+  const vals=[c];
+  const ok=v=>v>0.0005&&v<0.999&&vals.every(x=>Math.abs(x-v)>=gap)&&pct(v)!==pct(c);
+  for(const v of cands)if(vals.length<4&&ok(v))vals.push(v);
+  let g=0;const spread=Math.max(gap*4,Math.min(.2,c*1.2));
+  while(vals.length<4&&g++<800){const v=c+(Math.random()*2-1)*spread;if(ok(v))vals.push(v)}
+  return mc(q,pct(c),vals.slice(1).map(pct));
+}
+const join=(...a)=>[].concat(...a);
+function josa(w,a,b){for(let i=w.length-1;i>=0;i--){const c=w.charCodeAt(i);if(c>=0xAC00&&c<=0xD7A3)return w+((c-0xAC00)%28?a:b)}return w+b}
+const csTxt=cs=>'⟦'+cs.map(ct).join(' ')+'⟧';
+
+// ---- 기초: 규칙 문제 은행 [문제, 정답, 오답1, 오답2, 오답3, 해설]
+const RULES=[
+ ['텍사스 홀덤에서 각 플레이어가 받는 개인 카드(홀 카드)는 몇 장일까요?','2장','3장','4장','5장','홀덤은 2장을 받습니다. 4장을 받는 게임은 오마하입니다.'],
+ ['플랍에서 한 번에 공개되는 커뮤니티 카드는 몇 장일까요?','3장','1장','2장','5장','플랍 3장 → 턴 1장 → 리버 1장 순서로 공개됩니다.'],
+ ['네 번째로 공개되는 커뮤니티 카드를 뭐라고 부를까요?','턴','리버','플랍','버너','플랍(3장) 다음의 네 번째 카드가 턴, 마지막 다섯 번째 카드가 리버입니다.'],
+ ['마지막 다섯 번째 커뮤니티 카드를 뭐라고 부를까요?','리버','턴','쇼다운','플랍','다섯 번째 카드는 리버입니다. 리버 베팅이 끝나면 쇼다운으로 승자를 가립니다.'],
+ ['쇼다운에서 최종 족보는 어떻게 만들까요?','7장 중 가장 좋은 5장 조합','홀 카드 2장을 반드시 쓴 5장','7장 전부','보드 5장만','홀 카드 2장과 보드 5장, 총 7장 중 어떤 조합이든 가장 좋은 5장을 씁니다. 홀 카드를 하나도 안 써도(보드 플레이) 됩니다.'],
+ ['스몰 블라인드를 내는 자리는 어디일까요?','딜러 버튼 바로 왼쪽','딜러 버튼 바로 오른쪽','빅 블라인드 바로 왼쪽','딜러 버튼 자리','버튼 왼쪽이 스몰 블라인드, 그 왼쪽이 빅 블라인드입니다(헤즈업 제외).'],
+ ['프리플랍(첫 베팅 라운드)에서 가장 먼저 액션하는 사람은?','빅 블라인드 바로 왼쪽(UTG)','스몰 블라인드','딜러 버튼','빅 블라인드','프리플랍은 블라인드 다음 자리인 UTG부터 시작하고, 빅 블라인드가 마지막에 액션합니다.'],
+ ['플랍 이후 라운드에서 가장 먼저 액션하는 사람은?','버튼 왼쪽에서 가장 가까운 남은 플레이어','UTG','딜러 버튼','마지막에 레이즈한 사람','플랍부터는 버튼 왼쪽(보통 스몰 블라인드)부터 시계 방향으로 액션하고, 버튼이 가장 마지막입니다.'],
+ ['같은 족보, 같은 숫자의 플러시라면 무늬(♠♥♦♣)로 승부를 가릴까요?','아니요, 무늬에는 우열이 없다','네, 스페이드가 가장 높다','네, 하트가 가장 높다','딜러가 정한다','홀덤에서 무늬는 서열이 없습니다. 5장의 숫자가 모두 같으면 팟을 나눕니다(스플릿).'],
+ ['A-2-3-4-5 는 스트레이트로 인정될까요?','예, 가장 낮은 스트레이트','아니요, A는 항상 높은 카드','A-2-3-4-5는 플러시일 때만','예, 가장 높은 스트레이트','A는 낮은 카드로도 쓸 수 있어 A-2-3-4-5(휠)는 5 하이, 가장 낮은 스트레이트입니다.'],
+ ['Q-K-A-2-3 은 스트레이트일까요?','아니요','예','같은 무늬면 예','보드에 있을 때만 예','A를 사이에 두고 돌아가는(랩어라운드) 스트레이트는 인정되지 않습니다.'],
+ ['스트레이트와 플러시 중 더 높은 족보는?','플러시','스트레이트','같다','키커로 결정','높은 순서: 로열/스트레이트 플러시 > 포카드 > 풀 하우스 > 플러시 > 스트레이트 > 트리플 > 투 페어 > 원 페어 > 하이카드.'],
+ ['플러시와 풀 하우스 중 더 높은 족보는?','풀 하우스','플러시','같다','무늬로 결정','풀 하우스가 플러시보다 높습니다.'],
+ ['체크(베팅 없이 넘기기)를 할 수 있는 때는?','이번 라운드에 아직 베팅이 없을 때','언제든지','상대가 베팅했을 때','리버에서만','앞에서 누군가 베팅했다면 콜, 레이즈, 폴드 중에 골라야 합니다.'],
+ ['블라인드 1/2 게임에서 누군가 6으로 레이즈했습니다. 다시 레이즈하려면 최소 얼마로 올려야 할까요?','10','8','12','7','레이즈는 직전 증가분 이상이어야 합니다. 2에서 6으로 4만큼 올렸으니 다음 레이즈는 6+4=10 이상입니다.'],
+ ['헤즈업(1대1)에서 딜러 버튼을 가진 사람은?','스몰 블라인드를 내고 프리플랍에 먼저 액션','빅 블라인드를 내고 마지막에 액션','블라인드를 내지 않음','플랍 이후에도 먼저 액션','헤즈업에서는 버튼이 스몰 블라인드를 내고 프리플랍에 먼저, 플랍 이후에는 마지막에 액션합니다.'],
+ ['100칩으로 올인한 플레이어가 메인 팟에서 이기면, 각 상대에게서 최대 얼마까지 받을까요?','상대마다 100칩까지','상대가 건 전부','100칩의 절반','받을 수 없다','올인한 금액만큼만 각 상대와 겨룰 수 있고, 그 이상 걸린 칩은 사이드 팟으로 다른 사람끼리 겨룹니다.'],
+ ['7장 안에 페어가 세 개(예: K K 8 8 4 4 A) 있으면 최종 족보는?','투 페어 K·8, 키커 A','쓰리 페어','투 페어 K·8, 키커 4','풀 하우스','쓰리 페어라는 족보는 없습니다. 가장 높은 두 페어 + 남은 카드 중 가장 높은 카드 1장으로 5장을 만듭니다.'],
+ ['족보가 같을 때(예: 둘 다 A 원 페어) 다음으로 비교하는 것은?','키커(남은 카드)를 높은 순서로','무늬','먼저 베팅한 사람','홀 카드 합계','최고 5장 중 족보에 들지 않은 카드를 높은 것부터 하나씩 비교합니다. 5장이 모두 같으면 스플릿입니다.'],
+ ['보드에 A♠ K♠ Q♠ J♠ 10♠ 이 깔렸습니다. 누가 이길까요?','남은 모든 플레이어가 팟을 나눈다','A를 가진 사람','스페이드를 가진 사람','먼저 베팅한 사람','보드 자체가 로열 플러시라 누구도 더 좋은 5장을 만들 수 없습니다. 모두 보드를 플레이하고 팟을 나눕니다.'],
+];
+let ruleBag=[];
+function genRules(){
+  if(!ruleBag.length)ruleBag=shuffle(RULES.map((_,i)=>i));
+  const r=RULES[ruleBag.pop()];
+  return mc({kind:'basic',type:'규칙',prompt:r[0],groups:[],explain:r[5]},r[1],r.slice(2,5));
+}
+function genName(){
+  const target=rnd(9);let d=null,e=null;
+  for(let t=0;t<80000;t++){const x=draw(7);const y=ev(x);if(y.cat===target){d=x;e=y;break}}
+  if(!d){d=draw(7);e=ev(d)}
+  const hole=d.slice(0,2),board=d.slice(2),ci=catIdx(e);
+  const others=shuffle([...Array(10).keys()].filter(i=>i!==ci&&Math.abs(i-ci)<=3)).slice(0,3);
+  const b5=best5(d);
+  return mc({kind:'basic',type:'족보 판별',prompt:'내 홀 카드와 보드 5장으로 만들 수 있는 가장 높은 족보는?',
+    groups:[{label:'내 핸드',cards:hole},{label:'보드',cards:board}],hl:b5,meta:{t:'nm',d},
+    explain:'최고의 5장: '+csTxt(b5)+'\n→ '+desc(e)},CAT[ci],others.map(i=>CAT[i]));
+}
+function genShowdown(){
+  const same=Math.random()<.45;let a,b,bd,ea,eb;
+  for(let t=0;t<4000;t++){const d=draw(9);a=d.slice(0,2);b=d.slice(2,4);bd=d.slice(4);
+    ea=ev(join(a,bd));eb=ev(join(b,bd));if(!same||ea.cat===eb.cat)break}
+  const ans=ea.s>eb.s?0:eb.s>ea.s?1:2;
+  const ba=best5(join(a,bd)),bb=best5(join(b,bd));
+  let why;
+  if(ea.cat!==eb.cat){const hi=ea.cat>eb.cat?ea:eb,lo=ea.cat>eb.cat?eb:ea;why=josa(CAT[catIdx(hi)],'이','가')+' '+CAT[catIdx(lo)]+'보다 높습니다.'}
+  else if(ans===2)why='두 사람의 최고 5장이 같은 순위라 팟을 나눕니다.';
+  else why='같은 족보라서 족보를 이루는 숫자, 그다음 키커를 높은 순서로 비교합니다.';
+  const q={kind:'basic',type:'쇼다운 승자',prompt:'쇼다운입니다. 누가 이길까요?',
+    groups:[{label:'플레이어 A',cards:a},{label:'보드',cards:bd},{label:'플레이어 B',cards:b}],
+    choices:['A 승','B 승','스플릿 (무승부)'],answer:ans,meta:{t:'sd',a,b,bd},
+    explain:'A: '+desc(ea)+'\n   '+csTxt(ba)+'\nB: '+desc(eb)+'\n   '+csTxt(bb)+'\n\n'+why};
+  return q;
+}
+function genOrder(){
+  const ids=shuffle([...Array(10).keys()]).slice(0,4);const strong=Math.random()<.6;
+  const ans=strong?Math.max(...ids):Math.min(...ids);
+  return mc({kind:'basic',type:'족보 순서',prompt:'다음 중 가장 '+(strong?'높은':'낮은')+' 족보는?',groups:[],
+    explain:'높은 순서: '+CAT.slice().reverse().join(' > ')},CAT[ans],ids.filter(i=>i!==ans).map(i=>CAT[i]));
+}
+
+// ---- 확률
+const TL={3:'트리플(셋) 이상',4:'스트레이트 이상',5:'플러시 이상'};
+const NEXTC=nb=>nb===3?'턴 카드 한 장':'리버 카드 한 장';
+function isHit(hole,board,target){return ev(join(hole,board)).cat>=target}
+function scenario(nb){
+  for(let t=0;t<20000;t++){
+    let hole;
+    if(Math.random()<.5){const s=rnd(4),r1=rnd(13);let r2;do r2=rnd(13);while(r2===r1);hole=[r1*4+s,r2*4+s]}
+    else hole=draw(2);
+    const board=draw(nb,hole),known=join(hole,board),cur=ev(known),rest=deck(known);
+    const pp=(hole[0]>>2)===(hole[1]>>2);
+    for(const target of [3,4,5]){
+      if(target===3&&!pp)continue;
+      if(cur.cat>=target)continue;
+      // 보드만으로 족보가 완성되는 카드가 있으면 아웃츠 정의가 애매해지므로 이런 상황은 출제하지 않음
+      if(rest.some(c=>ev(join(board,[c])).cat>=target))continue;
+      const outs=rest.filter(c=>isHit(hole,join(board,[c]),target));
+      if(outs.length<2)continue;
+      const t2=Math.min(...outs.map(c=>ev(join(hole,board,[c])).cat));
+      return{hole,board,target:Math.max(target,Math.min(t2,5)),outs,rest};
+    }
+  }
+}
+const scnGroups=s=>[{label:'내 핸드',cards:s.hole},{label:s.board.length===3?'플랍':'플랍 + 턴',cards:s.board}];
+const outsTxt=o=>[0,1,2,3].map(su=>o.filter(c=>(c&3)===su)).filter(a=>a.length).map(a=>'⟦'+a.map(ct).join(' ')+'⟧').join('  ');
+function genOuts(){
+  const nb=Math.random()<.5?3:4,s=scenario(nb),n=s.outs.length;
+  return mc({kind:'prob',type:'아웃츠',prompt:(nb===3?'플랍':'턴')+'입니다. 다음에 나올 '+NEXTC(nb)+'으로 '+josa(TL[s.target],'을','를')+' 완성하는 아웃츠는 몇 장일까요?',meta:{t:'outs',hole:s.hole,board:s.board,target:s.target},
+    groups:scnGroups(s),
+    explain:'아웃츠 '+n+'장\n'+outsTxt(s.outs)+'\n\n남은 '+s.rest.length+'장 중 '+n+'장이므로 다음 한 장에 완성될 확률은 '+pct(n/s.rest.length)+'입니다.\n상대 패는 고려하지 않았습니다.\n참고: 플러시 드로우 9장, 양방 스트레이트 드로우 8장, 거트샷 4장, 포켓 페어로 셋 2장.'},
+    String(n),nearInts(n,1));
+}
+function riverHits(s){
+  const r=s.rest;let hit=0,tot=0;
+  for(let i=0;i<r.length;i++)for(let j=i+1;j<r.length;j++){tot++;if(isHit(s.hole,join(s.board,[r[i],r[j]]),s.target))hit++}
+  return{hit,tot};
+}
+function genHit(){
+  const nb=Math.random()<.55?3:4,s=scenario(nb),n=s.outs.length,R=s.rest.length;
+  const two=nb===3&&Math.random()<.6;
+  let p,ex,cands;
+  if(two){
+    const h=riverHits(s);p=h.hit/h.tot;const byOuts=1-comb(R-n,2)/comb(R,2);
+    ex='턴·리버 두 장 조합 '+h.tot+'가지를 모두 따지면 '+h.hit+'가지에서 완성 → '+pct(p)+'\n\n아웃츠 '+n+'장으로 계산: 1 − C('+(R-n)+',2)/C('+R+',2) = '+pct(byOuts)+'\n어림셈(4의 법칙): '+n+' × 4 ≈ '+n*4+'%';
+    if(Math.abs(byOuts-p)>0.0005)ex+='\n\n정확한 값이 조금 더 큰 건 턴·리버 두 장이 모두 맞아야 완성되는 경우(러너-러너)까지 셌기 때문입니다.';
+    cands=[n/R,n*0.04,2*n/R,byOuts+0.06];
+  }else{
+    p=n/R;
+    ex='아웃츠 '+n+'장 / 남은 카드 '+R+'장 = '+pct(p)+'\n어림셈(2의 법칙): '+n+' × 2 ≈ '+n*2+'%\n\n'+outsTxt(s.outs);
+    cands=[n/52,n*4/100,1-comb(R-n,2)/comb(R,2),n/(R-n)];
+  }
+  const what=two?'턴과 리버 두 장을 모두 봤을 때(리버까지) ':'다음에 나올 '+NEXTC(nb)+'으로 ';
+  return pctQ({kind:'prob',type:'완성 확률',prompt:(nb===3?'플랍':'턴')+'입니다. '+what+josa(TL[s.target],'을','를')+' 완성할 확률은?',
+    groups:scnGroups(s),explain:(two?'[턴 + 리버 두 장 기준]\n':'['+NEXTC(nb)+' 기준]\n')+ex,meta:{t:'hit',two,hole:s.hole,board:s.board,target:s.target}},p,cands,0.025);
+}
+function potBet(){const P=10*(2+rnd(29));const f=pick([0.25,1/3,0.5,2/3,0.75,1,1.5,2]);return{P,B:Math.max(5,Math.round(P*f/5)*5)}}
+function genPotOdds(){
+  const {P,B}=potBet(),req=B/(P+2*B);
+  return pctQ({kind:'prob',type:'팟 오즈',prompt:'팟에 '+P+'칩이 있고 상대가 '+B+'칩을 베팅했습니다.\n콜이 손해가 아니려면 최소 몇 %의 승률이 필요할까요?',groups:[],meta:{t:'po',P,B},
+    explain:'콜하면 최종 팟 = '+P+'(기존) + '+B+'(상대 베팅) + '+B+'(내 콜) = '+(P+2*B)+'\n필요 승률 = 콜 금액 / 최종 팟 = '+B+' / '+(P+2*B)+' = '+pct(req)+'\n팟 오즈로 말하면 '+(P+B)+' : '+B+' = '+((P+B)/B).toFixed(1)+' : 1'},
+    req,[B/(P+B),B/P,(B)/(P+3*B),2*B/(P+2*B)],0.03);
+}
+function genCallFold(){
+  const s=scenario(4),n=s.outs.length,R=s.rest.length,eq=n/R;
+  let P,B,req;
+  for(let t=0;t<500;t++){({P,B}=potBet());req=B/(P+2*B);if(Math.abs(req-eq)>=0.03)break}
+  const call=eq>req;
+  return{kind:'prob',type:'콜 or 폴드',
+    prompt:'턴입니다. 팟 '+P+'칩에 상대가 '+B+'칩을 베팅했습니다.\n리버에서 '+josa(TL[s.target],'을','를')+' 완성하면 이기고, 못 하면 진다고 할 때 어느 쪽이 이득일까요?',
+    groups:scnGroups(s),choices:['콜','폴드'],answer:call?0:1,meta:{t:'cf',P,B,hole:s.hole,board:s.board,target:s.target},
+    explain:'내 승률: 아웃츠 '+n+'장 / '+R+'장 = '+pct(eq)+'\n필요 승률: '+B+' / ('+P+' + '+B+' + '+B+') = '+pct(req)+'\n\n'+(call?'승률이 필요 승률보다 높으니 콜이 장기적으로 이득입니다.':'승률이 필요 승률보다 낮으니 폴드가 맞습니다.')+'\n(이후 추가로 벌 수 있는 칩, 즉 임플라이드 오즈는 계산에 넣지 않았습니다.)'};
+}
+function equityFlop(a,b,f){
+  const r=deck(join(a,b,f));let wa=0,wb=0,ti=0;
+  for(let i=0;i<r.length;i++)for(let j=i+1;j<r.length;j++){
+    const bd=join(f,[r[i],r[j]]);const x=ev(join(a,bd)).s,y=ev(join(b,bd)).s;
+    if(x>y)wa++;else if(y>x)wb++;else ti++}
+  const t=wa+wb+ti;return{wa,wb,ti,t};
+}
+function genEquity(){
+  let a,b,f,r;
+  for(let t=0;t<60;t++){const d=draw(7);a=d.slice(0,2);b=d.slice(2,4);f=d.slice(4);r=equityFlop(a,b,f);const w=r.wa/r.t;if(w>.04&&w<.96)break}
+  const pa=r.wa/r.t;
+  return pctQ({kind:'prob',type:'승률 계산',prompt:'플랍까지 나왔습니다. 턴과 리버를 끝까지 볼 때 플레이어 A가 이길 확률(무승부 제외)은?',
+    groups:[{label:'플레이어 A',cards:a},{label:'플랍',cards:f},{label:'플레이어 B',cards:b}],meta:{t:'eq',a,b,f},
+    explain:'남은 턴·리버 조합 '+r.t+'가지를 모두 계산했습니다.\nA 승 '+r.wa+' ('+pct(pa)+'), B 승 '+r.wb+' ('+pct(r.wb/r.t)+'), 무승부 '+r.ti+' ('+pct(r.ti/r.t)+')\n\n지금 A: '+desc(ev(join(a,f)))+'\n지금 B: '+desc(ev(join(b,f)))},
+    pa,[r.wb/r.t,1-pa,pa+0.15,pa-0.15],0.07);
+}
+function genCombos(){
+  const vis=draw(5),hole=vis.slice(0,2),flop=vis.slice(2);
+  const cnt=r=>vis.filter(c=>(c>>2)===r).length;
+  const visR=[...new Set(vis.map(c=>c>>2))];
+  let x=Math.random()<.65?pick(visR):rnd(13),pair=Math.random()<.35,y=x;
+  if(!pair){do y=rnd(13);while(y===x);if(y>x)[x,y]=[y,x]}
+  let ans,label,ex,kind=null;
+  if(pair){const av=4-cnt(x);ans=comb(av,2);label=rn(x)+(x===8?' ':'')+rn(x)+' (포켓 페어)';
+    ex='보이지 않는 '+rn(x)+'는 '+av+'장 → 그중 2장을 고르는 경우 C('+av+',2) = '+ans+'가지'}
+  else{kind=pick(['s','o','a']);let tot=0,su=0;
+    for(let a=0;a<4;a++)for(let b=0;b<4;b++){if(vis.includes(x*4+a)||vis.includes(y*4+b))continue;tot++;if(a===b)su++}
+    ans=kind==='s'?su:kind==='o'?tot-su:tot;
+    label=rn(x)+(x===8||y===8?' ':'')+rn(y)+(kind==='s'?' 수딧(같은 무늬)':kind==='o'?' 오프수트(다른 무늬)':' (무늬 상관없이)');
+    ex='보이지 않는 '+rn(x)+' '+(4-cnt(x))+'장 × '+rn(y)+' '+(4-cnt(y))+'장 = 전체 '+tot+'가지\n그중 같은 무늬(수딧) '+su+'가지, 다른 무늬(오프수트) '+(tot-su)+'가지'}
+  return mc({kind:'prob',type:'핸드 조합 수',prompt:'내 핸드와 플랍을 볼 때, 상대가 '+josa(label,'을','를')+' 들고 있을 수 있는 조합은 몇 가지일까요?',
+    groups:[{label:'내 핸드',cards:hole},{label:'플랍',cards:flop}],meta:{t:'combo',vis,x,y,pair,kind},
+    explain:ex+'\n\n참고: 보이는 카드가 없으면 포켓 페어 6, 수딧 4, 오프수트 12, 전체 16 조합입니다.'},String(ans),nearInts(ans,0));
+}
+const C503=comb(50,3);
+const PRE=[
+ ['포켓 페어(같은 숫자 두 장)를 받을 확률은?',3/51,'첫 장이 무엇이든 남은 51장 중 같은 숫자는 3장 → 3/51'],
+ ['AA를 받을 확률은?',6/1326,'AA 조합 6가지 / 전체 시작 핸드 1326가지 = 1/221'],
+ ['홀 카드 두 장이 같은 무늬(수딧)일 확률은?',12/51,'첫 장과 같은 무늬는 남은 51장 중 12장 → 12/51'],
+ ['AK(무늬 상관없이)를 받을 확률은?',16/1326,'A 4장 × K 4장 = 16가지 / 1326가지'],
+ ['포켓 페어로 플랍에서 셋 이상을 맞출 확률은?',1-comb(48,3)/C503,'플랍 3장이 모두 내 숫자를 피할 확률을 빼면: 1 − C(48,3)/C(50,3) = 1 − '+comb(48,3)+'/'+C503],
+ ['수딧 핸드로 플랍에서 바로 플러시가 완성될 확률은?',comb(11,3)/C503,'남은 같은 무늬 11장 중 3장이 나와야 함: C(11,3)/C(50,3) = '+comb(11,3)+'/'+C503],
+ ['수딧 핸드로 플랍에 같은 무늬가 정확히 2장 나와 플러시 드로우가 될 확률은?',comb(11,2)*39/C503,'C(11,2) × 39 / C(50,3) = '+comb(11,2)*39+'/'+C503],
+ ['페어가 아닌 두 장(예: A K)으로 플랍에 내 카드와 같은 숫자가 한 장 이상 나올 확률은?',1-comb(44,3)/C503,'내 숫자 6장을 모두 피할 확률을 빼면: 1 − C(44,3)/C(50,3) = 1 − '+comb(44,3)+'/'+C503],
+];
+function genPre(){
+  const p=pick(PRE),c=p[1];
+  return pctQ({kind:'prob',type:'프리플랍 확률',prompt:p[0],groups:[],explain:p[2]+' = '+pct(c)},c,[c*2,c/2,c*1.6,c*3].filter(v=>v<.95),Math.max(c*.2,0.001));
+}
+const GENS={basic:[[genRules,3],[genName,3],[genShowdown,3],[genOrder,1]],
+            prob:[[genOuts,3],[genHit,3],[genPotOdds,2],[genCallFold,2],[genEquity,2],[genCombos,2],[genPre,1]]};
+function generate(mode){
+  const list=mode==='all'?GENS.basic.concat(GENS.prob):GENS[mode];
+  let tot=0;for(const g of list)tot+=g[1];let x=Math.random()*tot;
+  for(const g of list){x-=g[1];if(x<0)return g[0]()}
+  return list[0][0]();
+}
+// ---- 음성
+const SPK_SU=['스페이드','하트','다이아','클로버'],SPK_R={A:'에이스',K:'킹',Q:'퀸',J:'잭'};
+const spCard=c=>SPK_SU[c&3]+' '+(SPK_R[rn(c>>2)]||rn(c>>2));
+function spText(s){
+  return s.replace(/⟦|⟧/g,'').replace(/C\((\d+),(\d+)\)/g,'콤비네이션 $1 $2')
+   .replace(/(10|[2-9AKQJ])([♠♥♦♣])/g,(m,r,su)=>SPK_SU[SU.indexOf(su)]+' '+(SPK_R[r]||r))
+   .replace(/·/g,' ').replace(/→/g,', ').replace(/ \+ /g,' 더하기 ').replace(/ − /g,' 빼기 ').replace(/ × /g,' 곱하기 ')
+   .replace(/\s*\/\s*/g,' 나누기 ').replace(/([A-Z0-9])-(?=[A-Z0-9])/g,'$1 ').replace(/\s*=\s*/g,', 즉 ').replace(/[♠♥♦♣]/g,m=>' '+SPK_SU[SU.indexOf(m)]+' ').replace(/[「」()]/g,' ').replace(/([?!.])\s*\./g,'$1');
+}
+const NUMW=[['1번','일번','첫번','첫째'],['2번','이번','두번','둘째'],['3번','삼번','세번','셋째'],['4번','사번','네번','넷째']];
+const NATW=[['1','일','하나'],['2','이','둘'],['3','삼','셋'],['4','사','넷']];
+const ALIAS={'A 승':['a승','에이승','a','에이','a가','에이가'],'B 승':['b승','비승','b','비','b가','비가'],'스플릿 (무승부)':['스플릿','무승부','비김','비겼','찹'],
+  '콜':['콜','call','콜이'],'폴드':['폴드','fold','폴더','죽어'],'트리플':['트리플','트립스','쓰리카드','셋'],'포카드':['포카드','포카'],'로열 플러시':['로열','로얄'],
+  '하이카드':['하이카드','노페어','탑카드'],'풀 하우스':['풀하우스','풀하우'],'스트레이트 플러시':['스트레이트플러시','스티플']};
+const vnorm=s=>String(s).toLowerCase().replace(/\s+/g,'').replace(/퍼센트|프로/g,'%').replace(/[.,!?。]$/,'');
+function findChoice(t,choices){
+  t=t.replace(/제출|정답은?|입니다|이요$|요$|할게|으로|로$/g,'');
+  if(!t)return -1;
+  for(let i=0;i<choices.length;i++)if(NUMW[i].some(w=>t.includes(w)))return i;
+  const numeric=choices.every(c=>/^\d+(\.\d+)?%?$/.test(c));
+  if(numeric){const m=t.match(/\d+(\.\d+)?/);if(m){const v=parseFloat(m[0]);const i=choices.findIndex(c=>Math.abs(parseFloat(c)-v)<1e-9);if(i>=0)return i}}
+  let best=-1,bl=0;
+  choices.forEach((c,i)=>{
+    const al=(ALIAS[c]||[]).concat([vnorm(c),vnorm(c.replace(/\(.*?\)/g,''))]);
+    for(const a of al){if(!a)continue;const hit=a.length===1&&/[a-z]/.test(a)?t===a:t.includes(a);if(hit&&a.length>bl){best=i;bl=a.length}}
+  });
+  if(best>=0)return best;
+  if(!numeric)for(let i=0;i<choices.length;i++)if(NATW[i].includes(t))return i;
+  return -1;
+}
+function matchSpeech(list,choices){
+  let done=false,idx=-1,cmd=null;
+  for(const raw of list){const t=vnorm(raw);
+    if(/제출/.test(t))done=true;
+    if(/그만|종료|음성끄|음성꺼/.test(t))cmd='stop';
+    else if(!cmd&&/다음/.test(t))cmd='next';
+    else if(!cmd&&/해설|설명/.test(t))cmd='explain';
+    else if(!cmd&&/다시|반복|한번더/.test(t))cmd='repeat';
+    if(idx<0)idx=findChoice(t,choices);
+  }
+  return{idx,done,cmd};
+}
+//ENGINE-END
+if(typeof document!=='undefined'){
+const $=id=>document.getElementById(id);
+let mode='all',q=null,answered=false;
+let st={c:0,t:0,streak:0,best:0,k:{basic:[0,0],prob:[0,0]}};
+try{const s=JSON.parse(localStorage.getItem('hq-stats'));if(s&&s.k)st=s}catch(e){}
+try{const m=localStorage.getItem('hq-mode');if(m)mode=m}catch(e){}
+const save=()=>{try{localStorage.setItem('hq-stats',JSON.stringify(st));localStorage.setItem('hq-mode',mode)}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cardHtml=(c,hl)=>'<div class="c in'+(isRed(c)?' r':'')+(hl?' hl':'')+'"><b>'+rn(c>>2)+'</b><i>'+SU[c&3]+'</i></div>';
+function renderScore(){
+  $('sScore').textContent=st.c+'/'+st.t;$('sRate').textContent=st.t?Math.round(st.c/st.t*100)+'%':'-';
+  $('sStreak').textContent=st.streak;$('sBest').textContent=st.best;
+  const k=st.k;$('kindStat').textContent='기초 '+k.basic[0]+'/'+k.basic[1]+' · 확률 '+k.prob[0]+'/'+k.prob[1];
+  document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+}
+function renderGroups(hl){
+  $('groups').className='groups g'+q.groups.length;
+  $('groups').innerHTML=q.groups.map(g=>'<div class="grp"><small>'+esc(g.label)+'</small><div class="cards">'+g.cards.map(c=>cardHtml(c,hl&&hl.includes(c))).join('')+'</div></div>').join('');
+}
+function fmtExplain(s){
+  return esc(s).replace(/⟦([^⟧]*)⟧/g,(m,inner)=>'<span class="cs">'+inner.split(' ').map(t=>/[♥♦]/.test(t)?'<span class="r">'+t+'</span>':t).join(' ')+'</span>');
+}
+function next(){
+  q=generate(mode);answered=false;
+  $('tag').textContent=(q.kind==='basic'?'기초':'확률')+' · '+q.type;$('tag').className='tag'+(q.kind==='prob'?' p':'');
+  $('prompt').textContent=q.prompt;renderGroups(null);
+  $('choices').className='choices'+(q.choices.some(c=>c.length>14)?' one':'');
+  $('choices').innerHTML=q.choices.map((c,i)=>'<button class="ch" data-i="'+i+'">'+esc(c)+'</button>').join('');
+  $('fb').className='fb';$('next').className='next';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(V.on)askVoice();
+}
+function choose(i){
+  if(answered||!q||i>=q.choices.length)return;answered=true;
+  const ok=i===q.answer;st.t++;st.k[q.kind][1]++;
+  if(ok){st.c++;st.k[q.kind][0]++;st.streak++;st.best=Math.max(st.best,st.streak)}else st.streak=0;
+  save();renderScore();
+  document.querySelectorAll('.ch').forEach((b,j)=>{b.disabled=true;b.classList.add(j===q.answer?'ok':j===i?'bad':'dim')});
+  if(q.hl)renderGroups(q.hl);
+  $('fbTitle').textContent=ok?'정답!':'오답. 정답은 「'+q.choices[q.answer]+'」';$('fbTitle').className=ok?'ok':'bad';
+  $('fbText').innerHTML=fmtExplain(q.explain);
+  $('fb').className='fb show';$('next').className='next show';
+  if(V.on)voiceFeedback(ok);
+  setTimeout(()=>{const r=$('next').getBoundingClientRect();if(r.bottom>innerHeight)$('next').scrollIntoView({behavior:'smooth',block:'end'})},50);
+}
+// ---- 음성 모드 제어
+const NV=window.AndroidVoice||null;
+const WebRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+const V={on:false,sel:-1,phase:'',retries:0,after:null,rec:null};
+const voiceOK=!!NV;
+function micState(txt,cls){$('micTxt').textContent=txt;$('micDot').className='dot'+(cls?' '+cls:'')}
+function vSpeak(text,then){
+  V.after=then||null;micState('읽는 중…','talk');
+  if(NV){NV.speak(text)}
+  else{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=1.05;u.onend=()=>window.onVoice('ttsDone');speechSynthesis.speak(u)}
+}
+function vListen(){
+  if(!V.on)return;micState(V.phase==='after'?'"다음" 또는 "해설"이라고 말해 주세요':'답을 말하고 "제출"이라고 말해 주세요','listen');
+  if(NV){NV.listen();return}
+  try{const r=new WebRec();r.lang='ko-KR';r.maxAlternatives=5;
+    r.onresult=e=>window.onVoice('result',[...e.results[0]].map(x=>x.transcript));
+    r.onerror=e=>window.onVoice('error',e.error);V.rec=r;r.start()}catch(e){micState('말하기 버튼을 눌러 주세요')}
+}
+function vStop(){V.after=null;if(NV)NV.stop();else{try{speechSynthesis.cancel()}catch(e){}try{V.rec&&V.rec.abort()}catch(e){}}}
+function select(i){V.sel=i;document.querySelectorAll('.ch').forEach((b,j)=>b.classList.toggle('sel',j===i))}
+function questionSpeech(){
+  const g=q.groups.map(g=>g.label.replace(' + ','과 ')+', '+g.cards.map(spCard).join(', ')).join('. ');
+  return q.type+' 문제. '+spText(q.prompt)+'. '+(g?g+'. ':'')+q.choices.map((c,i)=>(i+1)+'번, '+spText(c)).join('. ')+'.';
+}
+function askVoice(){V.phase='answer';V.sel=-1;V.retries=0;vSpeak(questionSpeech()+' 답을 말한 뒤 제출이라고 하세요.',vListen)}
+function voiceFeedback(ok){
+  V.phase='after';V.retries=0;
+  const a=q.answer;
+  vSpeak((ok?'정답입니다. ':'틀렸습니다. 정답은 '+(a+1)+'번, '+spText(q.choices[a])+'. ')+spText(q.explain)+'. 다음 문제로 가려면 다음이라고 말하세요.',vListen);
+}
+function retry(msg){
+  if(++V.retries>3){micState('말하기 버튼을 누르면 다시 들어요');return}
+  if(msg)vSpeak(msg,vListen);else vListen();
+}
+window.onVoice=(type,p)=>{
+  if(!V.on)return;
+  if(type==='ttsDone'){const f=V.after;V.after=null;if(f)f();return}
+  if(type==='error'){
+    if(p==='perm'||p==='not-allowed'||p==9){setVoice(false);micState('마이크 권한이 필요해요');$('mic').classList.add('show');return}
+    retry(null);return}
+  if(type==='paused'){micState('말하기 버튼을 누르면 다시 들어요');return}
+  if(type!=='result'||!q)return;
+  const r=matchSpeech(p||[],q.choices);
+  if(r.cmd==='stop'){setVoice(false);return}
+  if(V.phase==='after'){
+    if(r.cmd==='next'){next();return}
+    if(r.cmd==='explain'||r.cmd==='repeat'){V.retries=0;vSpeak(spText(q.explain),vListen);return}
+    retry('다음, 또는 해설이라고 말해 주세요.');return}
+  if(r.cmd==='repeat'&&r.idx<0){askVoice();return}
+  if(r.idx>=0){select(r.idx);V.retries=0}
+  if(r.done&&V.sel>=0){choose(V.sel);return}
+  if(r.done){retry('아직 고른 답이 없어요. 몇 번인지 말해 주세요.');return}
+  if(r.idx>=0){vSpeak((r.idx+1)+'번, '+spText(q.choices[r.idx])+'. 맞으면 제출이라고 말하세요.',vListen);return}
+  retry('잘 못 알아들었어요. 번호나 답을 말해 주세요.');
+};
+function setVoice(on){
+  V.on=on;$('voiceBtn').classList.toggle('on',on);$('voiceBtn').textContent=on?'음성 모드 켜짐':'음성 모드';
+  $('mic').classList.toggle('show',on);
+  try{localStorage.setItem('hq-voice',on?'1':'0')}catch(e){}
+  if(!on){vStop();select(-1);return}
+  if(answered){V.phase='after';V.retries=0;vSpeak('다음 문제로 가려면 다음이라고 말하세요.',vListen)}else askVoice();
+}
+if(voiceOK){$('voiceBtn').hidden=false;$('voiceBtn').addEventListener('click',()=>setVoice(!V.on))}
+$('micBtn').addEventListener('click',()=>{if(!V.on)return;V.retries=0;vStop();vListen()});
+$('choices').addEventListener('click',e=>{const b=e.target.closest('.ch');if(b)choose(+b.dataset.i)});
+$('next').addEventListener('click',next);
+$('modes').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;save();renderScore();next()});
+$('reset').addEventListener('click',()=>{st={c:0,t:0,streak:0,best:0,k:{basic:[0,0],prob:[0,0]}};save();renderScore()});
+document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='4')choose(+e.key-1);else if((e.key==='Enter'||e.key===' ')&&answered){e.preventDefault();next()}});
+renderScore();next();
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+}
+</script>
+</body>
+</html>
