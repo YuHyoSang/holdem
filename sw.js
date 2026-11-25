@@ -1,5 +1,5 @@
 // 온라인이면 항상 최신 파일을 먼저 받아오고(network-first), 오프라인일 때만 저장해 둔 파일을 씁니다.
-const CACHE = 'holdem-quiz-v1.5.1';
+const CACHE = 'holdem-quiz-v1.5.2';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'notes.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, {cache: 'reload'})))).then(() => self.skipWaiting()));

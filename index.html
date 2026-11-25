@@ -97,7 +97,7 @@ h1{margin-right:auto!important}
 .paper table{border-collapse:collapse;width:100%;font-size:14px;margin-top:6px}
 .paper th,.paper td{border-bottom:1px solid #dde5df;padding:6px 8px;text-align:left;vertical-align:top}
 .paper th{background:#eef4f0;font-size:13px;white-space:nowrap}
-.paper td:not(:first-child){white-space:nowrap}
+.paper td.nw{white-space:nowrap}
 .tscroll{overflow-x:auto}
 .secnav{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
 .secnav a{flex:none;color:var(--ink);text-decoration:none;font-size:14px;font-weight:700;background:rgba(0,0,0,.25);border-radius:999px;padding:8px 12px}
@@ -230,7 +230,7 @@ details.paper>summary::after{content:'+';font-size:22px;color:#0f5a3c}details.pa
   <button class="next" id="next">다음 문제</button>
   </div>
   </div>
-  <div class="foot"><span id="kindStat"></span><span class="ver">v1.5</span><button id="reset">점수 초기화</button></div>
+  <div class="foot"><span id="kindStat"></span><span class="ver">v1.5.1</span><button id="reset">점수 초기화</button></div>
   </div>
   <div id="vNotes" class="view" hidden></div>
   <div id="vWrong" class="view" hidden></div>
@@ -959,7 +959,7 @@ function renderNotes(){
    S.map((s,i)=>'<details class="paper" id="ns'+i+'"'+(i===0?' open':'')+'><summary>'+esc(s.title)+'</summary>'+(s.items||[]).map(it=>
      '<h3>'+esc(it.h||'')+'</h3>'+(it.body?'<p>'+fmtExplain(it.body)+'</p>':'')+(it.grid&&RSET[it.grid]?rangeGrid(RSET[it.grid]):'')+
      (it.table?'<div class="tscroll"><table><thead><tr>'+it.table[0].map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+
-       it.table.slice(1).map(r=>'<tr>'+r.map(c=>'<td>'+fmtExplain(String(c))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'')).join('')+'</details>').join('');
+       it.table.slice(1).map(r=>'<tr>'+r.map(c=>'<td'+(String(c).length<=12?' class="nw"':'')+'>'+fmtExplain(String(c))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'')).join('')+'</details>').join('');
 }
 $('vNotes').addEventListener('click',e=>{const a=e.target.closest('.secnav a');if(!a)return;e.preventDefault();const d=$('ns'+a.dataset.s);d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'})});
 // ---- 기록 (세션, 틸트, 뱅크롤)
