@@ -1,5 +1,5 @@
 // 한 번 열면 오프라인에서도 동작. 온라인이면 새 버전을 받아 두었다가 다음 실행 때 반영.
-const CACHE = 'holdem-quiz-v1.4';
+const CACHE = 'holdem-quiz-v1.5';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'notes.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

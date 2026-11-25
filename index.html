@@ -36,7 +36,7 @@ h1{margin-right:auto!important}
 .score small{font-size:12px;color:var(--mute)}
 .table{background:rgba(0,0,0,.18);border:2px solid rgba(255,255,255,.08);border-radius:22px;padding:14px;box-shadow:inset 0 2px 18px rgba(0,0,0,.35)}
 .tag{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--gold);color:#3a2a00}
-.tag.p{background:#8fd3ff;color:#06314a}
+.tag.p{background:#8fd3ff;color:#06314a}.tag.rg{background:#c9b6ff;color:#2a1660}
 .q{font-size:17px;font-weight:700;margin:10px 0 4px;white-space:pre-line}
 .groups{display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:center;margin-top:10px}
 .grp{text-align:center}
@@ -85,7 +85,7 @@ h1{margin-right:auto!important}
 .foot .ver{opacity:.7}
 /* 탭, 노트, 오답노트 */
 .view{display:flex;flex-direction:column;gap:12px}.view[hidden]{display:none}
-.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .tabs button{font:inherit;font-weight:800;font-size:15px;min-height:46px;border-radius:12px;border:0;background:rgba(0,0,0,.25);color:var(--mute)}
 .tabs button.on{background:var(--ink);color:#12301f}
 .tabs b{display:inline-block;min-width:1.6em;padding:0 .4em;border-radius:999px;background:var(--bad);color:#fff;font-size:.85em}
@@ -114,6 +114,28 @@ details.paper>summary::after{content:'+';font-size:22px;color:#0f5a3c}details.pa
 .empty{color:var(--mute);text-align:center;padding:30px 10px}
 .retryTag{background:var(--bad);color:#fff;margin-left:6px}
 @media (min-width:560px){.tabs button{font-size:clamp(15px,2.3vw,22px);min-height:clamp(46px,6.5vw,64px)}.paper p,.paper table{font-size:clamp(15px,2.2vw,19px)}.paper h2,details.paper>summary{font-size:clamp(19px,3vw,26px)}}
+/* 기록 탭 */
+.frm{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px;margin-top:8px}
+.frm label,.memo{display:flex;flex-direction:column;font-size:13px;font-weight:700;color:#3a4a40;gap:4px}
+.paper input,.paper select,.paper textarea{font:inherit;font-size:16px;border:1px solid #c9d4cc;border-radius:10px;padding:10px;background:#fff;color:#1d2a22;min-height:44px;width:100%}
+.memo{margin-top:10px}
+.tiltRow{margin-top:10px;font-size:13px;font-weight:700;color:#3a4a40}
+.tilt{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:4px}
+.tilt button{font:inherit;font-size:14px;font-weight:700;min-height:44px;border-radius:10px;border:1px solid #c9d4cc;background:#fff;color:#1d2a22}
+.tilt button.on{background:#0f5a3c;color:#fff;border-color:#0f5a3c}
+.save{font:inherit;font-weight:800;font-size:17px;width:100%;min-height:52px;border:0;border-radius:12px;background:var(--gold);color:#3a2a00;margin-top:12px}
+.msg{min-height:1.2em;color:#178a46;font-weight:700;margin-top:6px!important}
+.out{font-weight:700;margin-top:8px!important}.out .good{color:#178a46}.out .warn{color:#b8860b}.out .bad{color:#c22d2d}
+.sumg{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:8px}
+.sumg div{background:#eef4f0;border-radius:10px;padding:8px;text-align:center}.sumg b{display:block;font-size:20px;font-variant-numeric:tabular-nums}.sumg small{font-size:12px;color:#5b6d62}
+.plus{color:#178a46}.minus{color:#c22d2d}
+.sess{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.sess .amt{font-weight:800;font-size:18px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sess button{font:inherit;font-size:13px;border:0;background:#e8ece9;border-radius:8px;min-height:36px;padding:0 10px;margin-top:6px}
+.row2{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}.row2 button{font:inherit;font-weight:700;border:0;border-radius:10px;min-height:44px;padding:0 14px;background:#0f5a3c;color:#fff}
+.rgrid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:2px;margin-top:8px;max-width:560px}
+.rgrid span{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:clamp(7px,2.1vw,12px);font-weight:700;border-radius:3px;background:#e3e8e4;color:#6b7a70}
+.rgrid span.in{background:#0f5a3c;color:#fff}
 /* 카드 크기는 화면 폭에 비례 (--cw = 카드 너비) */
 :root{--cw:46px}
 @media (max-width:380px){:root{--cw:40px}.groups{gap:8px 12px}}
@@ -179,12 +201,14 @@ details.paper>summary::after{content:'+';font-size:22px;color:#0f5a3c}details.pa
       <button data-m="all" class="on">전체</button>
       <button data-m="basic">기초</button>
       <button data-m="prob">확률</button>
+      <button data-m="range">레인지</button>
     </div>
   </header>
   <nav class="tabs" id="tabs">
     <button data-v="quiz" class="on">퀴즈</button>
     <button data-v="notes">학습 노트</button>
     <button data-v="wrong">오답노트 <b id="wrongCount"></b></button>
+    <button data-v="log">기록</button>
   </nav>
   <div id="vQuiz" class="view">
   <div class="score">
@@ -206,10 +230,44 @@ details.paper>summary::after{content:'+';font-size:22px;color:#0f5a3c}details.pa
   <button class="next" id="next">다음 문제</button>
   </div>
   </div>
-  <div class="foot"><span id="kindStat"></span><span class="ver">v1.4</span><button id="reset">점수 초기화</button></div>
+  <div class="foot"><span id="kindStat"></span><span class="ver">v1.5</span><button id="reset">점수 초기화</button></div>
   </div>
   <div id="vNotes" class="view" hidden></div>
   <div id="vWrong" class="view" hidden></div>
+  <div id="vLog" class="view" hidden>
+    <div class="paper">
+      <h2>뱅크롤 점검</h2>
+      <div class="frm">
+        <label>현재 뱅크롤<input id="bkAmt" type="number" inputmode="decimal" min="0"></label>
+        <label>한 번 바이인<input id="bkBuy" type="number" inputmode="decimal" min="0"></label>
+        <label>게임<select id="bkType"><option value="cash">캐시 게임</option><option value="mtt">토너먼트</option></select></label>
+      </div>
+      <p id="bkOut" class="out"></p>
+    </div>
+    <div class="paper">
+      <h2>세션 기록하기</h2>
+      <div class="frm">
+        <label>날짜<input id="lgDate" type="date"></label>
+        <label>게임<select id="lgType"><option value="cash">캐시 게임</option><option value="mtt">토너먼트</option></select></label>
+        <label>스테이크·장소<input id="lgStake" type="text" placeholder="예: 1/2 홈게임"></label>
+        <label>들어간 돈 (바이인 합계)<input id="lgIn" type="number" inputmode="decimal" min="0"></label>
+        <label>가지고 나온 돈<input id="lgOut" type="number" inputmode="decimal" min="0"></label>
+        <label>플레이 시간 (시간)<input id="lgHrs" type="number" inputmode="decimal" min="0" step="0.5"></label>
+      </div>
+      <div class="tiltRow"><span>틸트 정도</span><div id="lgTilt" class="tilt"><button data-t="1">1 평온</button><button data-t="2">2</button><button data-t="3">3</button><button data-t="4">4</button><button data-t="5">5 폭발</button></div></div>
+      <label class="memo">메모 (잘한 점, 실수, 감정)<textarea id="lgMemo" rows="2"></textarea></label>
+      <button id="lgSave" class="save">기록 저장</button>
+      <p id="lgMsg" class="msg"></p>
+    </div>
+    <div class="paper" id="lgSum"></div>
+    <div id="lgList"></div>
+    <details class="paper"><summary>백업과 복원</summary>
+      <p>기록은 이 기기에만 저장돼요. 기기를 바꾸기 전에 백업 내용을 복사해 메모 앱 등에 보관하세요.</p>
+      <div class="row2"><button id="bkCopy">백업 내용 만들기</button><button id="bkLoad">붙여넣은 내용으로 복원</button></div>
+      <textarea id="bkText" rows="4" placeholder="여기에 백업 내용이 나오거나, 복원할 내용을 붙여넣어요"></textarea>
+      <p id="bkMsg" class="msg"></p>
+    </details>
+  </div>
 </div>
 <script>
 {
@@ -594,10 +652,101 @@ function genPFEq(){
     groups:[{label:'플레이어 A',cards:a},{label:'플레이어 B',cards:b}],
     explain:'나올 수 있는 보드 '+tot.toLocaleString('ko-KR')+'가지를 모두 계산했습니다.\nA 승 '+pct(wa/tot)+', B 승 '+pct(wb/tot)+', 무승부 '+pct(tie/tot)+'\n\n'+m[5]},c+'%',ws.map(v=>v+'%'));
 }
-const GENS={basic:[[genRules,5],[genName,3],[genShowdown,2],[genCompare5,2],[genFind,2],[genOrder,1]],
-            prob:[[genEasyPot,4],[genEasyProb,2],[genRule24,2],[genDraws,2],[genEV,2],[genPFEq,3],[genOuts,2],[genHit,2],[genPotOdds,1],[genCallFold,1],[genEquity,1],[genCombos,1],[genPre,1]]};
+
+// ---- 프리플랍 레인지 (6인, 100BB, 앞에서 모두 폴드했을 때의 단순화한 기본 오픈 차트)
+const POS=['UTG','HJ','CO','BTN'];
+const POS_KO={UTG:'UTG (언더 더 건)',HJ:'HJ (하이잭)',CO:'CO (컷오프)',BTN:'BTN (버튼)'};
+const RANGES={
+ UTG:'22+, A2s+, K9s+, Q9s+, J9s+, T9s, 98s, 87s, AJo+, KQo',
+ HJ:'22+, A2s+, K8s+, Q9s+, J9s+, T8s+, 97s+, 86s+, 76s, ATo+, KJo+, QJo',
+ CO:'22+, A2s+, K5s+, Q8s+, J8s+, T8s+, 97s+, 86s+, 75s+, 65s, 54s, A8o+, KTo+, QTo+, JTo',
+ BTN:'22+, A2s+, K2s+, Q4s+, J6s+, T6s+, 96s+, 85s+, 74s+, 64s+, 53s+, 43s, A2o+, K8o+, Q9o+, J9o+, T9o, 98o'};
+const RI=c=>'23456789TJQKA'.indexOf(c);
+function parseRange(str){
+  const out=new Set();
+  for(let t of str.split(',')){t=t.trim();if(!t)continue;
+    const plus=t.endsWith('+');if(plus)t=t.slice(0,-1);
+    const a=RI(t[0]),b=RI(t[1]),k=t[2]||'';
+    if(a===b){for(let r=a;r<=(plus?12:a);r++)out.add(RK[r]+RK[r]);continue}
+    for(let r=b;r<=(plus?a-1:b);r++)out.add(RK[a]+RK[r]+k);
+  }
+  return out;
+}
+const RSET={};for(const p of POS)RSET[p]=parseRange(RANGES[p]);
+const handCode=(c1,c2)=>{let a=c1>>2,b=c2>>2;if(a<b)[a,b]=[b,a];return a===b?RK[a]+RK[b]:RK[a]+RK[b]+((c1&3)===(c2&3)?'s':'o')};
+const codeCombos=code=>code.length===2?6:code[2]==='s'?4:12;
+const rangePct=set=>[...set].reduce((n,c)=>n+codeCombos(c),0)/1326;
+const codeKo=code=>{const a=RI(code[0]),b=RI(code[1]);return rn(a)+(a===8||b===8?' ':'')+rn(b)+(code.length===2?'':code[2]==='s'?' 수딧':' 오프수트')};
+function dealCode(code){
+  const a=RI(code[0]),b=RI(code[1]);
+  if(a===b){const [x,y]=shuffle([0,1,2,3]);return[a*4+x,b*4+y]}
+  if(code[2]==='s'){const x=rnd(4);return[a*4+x,b*4+x]}
+  const [x,y]=shuffle([0,1,2,3]);return[a*4+x,b*4+y];
+}
+function allCodes(){const o=[];for(let a=12;a>=0;a--)for(let b=a;b>=0;b--){if(a===b)o.push(RK[a]+RK[a]);else{o.push(RK[a]+RK[b]+'s');o.push(RK[a]+RK[b]+'o')}}return o}
+const ALLC=allCodes();
+const earliest=code=>{for(const p of POS)if(RSET[p].has(code))return p;return null};
+function genRangeOpen(){
+  const pos=pick(POS);let code;
+  if(Math.random()<.65){const i=POS.indexOf(pos);const near=ALLC.filter(c=>{const e=earliest(c);const ei=e?POS.indexOf(e):4;return Math.abs(ei-i)<=1&&ei!==i||ei===i});code=pick(near)}
+  else code=pick(ALLC);
+  const hole=dealCode(code),inR=RSET[pos].has(code),e=earliest(code);
+  return{kind:'range',type:'오픈 레인지',prompt:'6인 테이블, 스택 100BB. 앞사람이 모두 폴드했고 당신은 '+POS_KO[pos]+'입니다.\n이 핸드로 오픈 레이즈할까요, 폴드할까요?',
+    groups:[{label:'내 핸드 ('+codeKo(code)+')',cards:hole}],choices:['레이즈','폴드'],answer:inR?0:1,meta:{t:'ro',pos,code},
+    explain:josa(codeKo(code),'은','는')+' '+(e?e+'부터 오픈하는 핸드':'BTN에서도 오픈하지 않는 핸드')+'입니다.\n\n'+pos+' 오픈 레인지 (전체 핸드의 약 '+Math.round(rangePct(RSET[pos])*100)+'%)\n'+RANGES[pos]+'\n\n뒤 포지션일수록 남은 상대가 적고 플랍 이후 마지막에 액션하므로 레인지를 넓힙니다. (학습용으로 단순화한 기본 차트입니다.)'};
+}
+function genRangeEarliest(){
+  const code=pick(ALLC.filter(c=>earliest(c)||Math.random()<.15)),e=earliest(code);
+  const lab={UTG:'UTG부터',HJ:'HJ부터',CO:'CO부터',BTN:'BTN에서만',none:'오픈하지 않음'};
+  const corr=lab[e||'none'];
+  return mc({kind:'range',type:'오픈 포지션',prompt:'6인 테이블, 앞에서 모두 폴드했을 때 '+josa(codeKo(code),'은','는')+' 어느 포지션부터 오픈 레이즈할까요?',
+    groups:[{label:codeKo(code),cards:dealCode(code)}],meta:{t:'re',code},
+    explain:POS.map(p=>p+' (약 '+Math.round(rangePct(RSET[p])*100)+'%): '+(RSET[p].has(code)?'오픈':'폴드')).join('\n')+'\n\n앞 포지션일수록 뒤에 남은 사람이 많아 더 강한 핸드만 오픈합니다.'},
+    corr,shuffle(Object.values(lab).filter(x=>x!==corr)));
+}
+function genRangePct(){
+  const pos=pick(POS),c=rangePct(RSET[pos]);
+  return pctQ({kind:'range',type:'레인지 크기',prompt:pos+' 오픈 레인지('+RANGES[pos]+')는 전체 시작 핸드 1326가지 중 대략 몇 %일까요?',groups:[],meta:{t:'rp',pos},
+    explain:'페어 1종류 6조합, 수딧 4조합, 오프수트 12조합으로 세면 '+Math.round(c*1326)+'조합 ÷ 1326 = '+pct(c)+'\n\n'+POS.map(p=>p+' 약 '+pct(rangePct(RSET[p]))).join(', ')},c,POS.filter(p=>p!==pos).map(p=>rangePct(RSET[p])).concat([c*2,c/2]),0.04);
+}
+function rangeCombos(set,dead){
+  const d=new Set(dead),o=[];
+  for(let x=0;x<52;x++)for(let y=x+1;y<52;y++){if(d.has(x)||d.has(y))continue;if(set.has(handCode(x,y)))o.push([x,y])}
+  return o;
+}
+function genRangeRead(){
+  const pos=pick(POS),flop=draw(3),combos=rangeCombos(RSET[pos],flop);
+  const lv=pick([[1,'원 페어 이상'],[2,'투 페어 이상'],[3,'트리플(셋) 이상']]);
+  const byCat=new Array(10).fill(0);let hit=0;
+  for(const h of combos){const e=ev(h.concat(flop));byCat[catIdx(e)]++;if(e.cat>=lv[0])hit++}
+  const p=hit/combos.length;
+  const br=byCat.map((n,i)=>n?CAT[i]+' '+n:'').filter(Boolean).reverse().join(', ');
+  return pctQ({kind:'range',type:'상대 레인지 읽기',prompt:'상대가 '+pos+'에서 오픈했고 당신이 콜했습니다. 상대 레인지가 '+pos+' 기본 오픈 레인지라면, 이 플랍에서 상대가 '+lv[1]+'을 가진 비율은?',
+    groups:[{label:'플랍',cards:flop}],meta:{t:'rr',pos,flop,lv:lv[0]},
+    explain:pos+' 레인지에서 플랍 카드와 겹치는 조합을 빼면 '+combos.length+'조합\n그중 '+lv[1]+': '+hit+'조합 → '+pct(p)+'\n\n족보별 조합 수: '+br+'\n\n이렇게 상대 레인지 전체가 보드에 얼마나 맞았는지 따져 보면 베팅·블러프 판단에 도움이 됩니다.'},p,[p+0.12,p-0.12,p*2,p/2,p+0.2,p*3],p<0.1?0.02:0.06);
+}
+// ---- 수학 드릴
+function genMath(){
+  const sub=rnd(4);
+  if(sub===3){const pot=pick([20,40,50,60,80,100,120,150,200]),stack=pot*pick([1,1.5,2,3,4,5,6,8,10,13]);const c=stack/pot;const f=v=>(Math.round(v*10)/10).toString();
+    return mc({kind:'prob',type:'SPR',prompt:'플랍에서 팟은 '+pot+'칩이고, 나와 상대의 남은 스택 중 작은 쪽이 '+stack+'칩입니다. SPR(스택 대 팟 비율)은?',groups:[],meta:{t:'spr',pot,stack},
+      explain:'SPR = 남은 유효 스택 ÷ 팟 = '+stack+' ÷ '+pot+' = '+f(c)+'\n\nSPR이 낮을수록(1~3) 탑 페어로도 올인하기 쉽고, 높을수록(10 이상) 셋·스트레이트 같은 강한 패가 필요합니다.'},
+      f(c),[f(c+1),f(c*2),f(Math.max(0.5,c-1)),f(pot/stack)])}
+  const P=pick([40,60,80,100,120,150,200,300]),fr=pick([0.25,1/3,0.5,2/3,0.75,1,1.5,2]),B=Math.max(5,Math.round(P*fr/5)*5);
+  if(sub===0){const c=P/(P+B);
+    return pctQ({kind:'prob',type:'MDF (최소 방어 비율)',prompt:'팟 '+P+'칩에 상대가 '+B+'칩을 베팅했습니다. 상대의 블러프가 무조건 이득이 되지 않으려면 내 레인지의 최소 몇 %를 계속(콜·레이즈)해야 할까요? (MDF)',groups:[],meta:{t:'mdf',P,B},
+      explain:'MDF = 팟 ÷ (팟 + 상대 베팅) = '+P+' ÷ '+(P+B)+' = '+pct(c)+'\n이보다 많이 폴드하면 상대는 아무 카드로나 블러프해도 이득입니다.\n\n베팅이 클수록 MDF는 낮아집니다: 하프 팟 67%, 팟 사이즈 50%, 2배 팟 33%.'},c,[B/(P+B),B/(P+2*B),1-B/(P+2*B),c+0.15],0.03)}
+  if(sub===1){const c=B/(P+B);
+    return pctQ({kind:'prob',type:'블러프 손익분기',prompt:'팟 '+P+'칩에 내가 '+B+'칩으로 블러프합니다(이기는 방법은 상대 폴드뿐). 상대가 최소 몇 % 폴드해야 본전일까요?',groups:[],meta:{t:'alpha',P,B},
+      explain:'필요 폴드율 = 내 베팅 ÷ (팟 + 내 베팅) = '+B+' ÷ '+(P+B)+' = '+pct(c)+'\n상대가 이보다 자주 폴드하면 블러프가 이득입니다.\n\nMDF와 합치면 100%가 됩니다 (MDF '+pct(1-c)+').'},c,[P/(P+B),B/(P+2*B),B/P,c+0.15],0.03)}
+  const c=B/(P+2*B);
+  return pctQ({kind:'prob',type:'블러프 비율',prompt:'리버에서 팟 '+P+'칩에 '+B+'칩을 베팅합니다. 상대가 콜·폴드 어느 쪽도 이득이 없게 하려면 내 베팅 레인지 중 블러프 비율은 몇 %여야 할까요?',groups:[],meta:{t:'bluff',P,B},
+    explain:'블러프 비율 = 베팅 ÷ (팟 + 베팅 × 2) = '+B+' ÷ '+(P+2*B)+' = '+pct(c)+'\n상대 입장의 필요 승률과 같은 값입니다. 블러프가 이보다 많으면 상대는 콜, 적으면 폴드가 이득입니다.\n\n팟 사이즈 베팅이면 33%(밸류 2 : 블러프 1), 하프 팟이면 25%(밸류 3 : 블러프 1).'},c,[B/(P+B),P/(P+B),B/P,c+0.15],0.03);
+}
+const GENS={range:[[genRangeOpen,4],[genRangeEarliest,2],[genRangePct,1],[genRangeRead,3]],basic:[[genRules,5],[genName,3],[genShowdown,2],[genCompare5,2],[genFind,2],[genOrder,1]],
+            prob:[[genEasyPot,4],[genEasyProb,2],[genRule24,2],[genDraws,2],[genEV,2],[genPFEq,3],[genOuts,2],[genHit,2],[genPotOdds,1],[genCallFold,1],[genEquity,1],[genCombos,1],[genPre,1],[genMath,4]]};
 function generate(mode){
-  const list=mode==='all'?GENS.basic.concat(GENS.prob):GENS[mode];
+  const list=mode==='all'?GENS.basic.concat(GENS.prob,GENS.range):GENS[mode]||GENS.basic;
   let tot=0;for(const g of list)tot+=g[1];let x=Math.random()*tot;
   for(const g of list){x-=g[1];if(x<0)return g[0]()}
   return list[0][0]();
@@ -648,8 +797,10 @@ function matchSpeech(list,choices){
 if(typeof document!=='undefined'){
 const $=id=>document.getElementById(id);
 let mode='all',q=null,answered=false;
-let st={c:0,t:0,streak:0,best:0,k:{basic:[0,0],prob:[0,0]}};
+let st={c:0,t:0,streak:0,best:0,k:{basic:[0,0],prob:[0,0],range:[0,0]}};
 try{const s=JSON.parse(localStorage.getItem('hq-stats'));if(s&&s.k)st=s}catch(e){}
+if(!st.k.range)st.k.range=[0,0];
+const KIND_KO={basic:'기초',prob:'확률',range:'레인지'};
 try{const m=localStorage.getItem('hq-mode');if(m)mode=m}catch(e){}
 const save=()=>{try{localStorage.setItem('hq-stats',JSON.stringify(st));localStorage.setItem('hq-mode',mode)}catch(e){}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -657,7 +808,7 @@ const cardHtml=(c,hl)=>'<div class="c in'+(isRed(c)?' r':'')+(hl?' hl':'')+'"><b
 function renderScore(){
   $('sScore').textContent=st.c+'/'+st.t;$('sRate').textContent=st.t?Math.round(st.c/st.t*100)+'%':'-';
   $('sStreak').textContent=st.streak;$('sBest').textContent=st.best;
-  const k=st.k;$('kindStat').textContent='기초 '+k.basic[0]+'/'+k.basic[1]+' · 확률 '+k.prob[0]+'/'+k.prob[1];
+  const k=st.k;$('kindStat').textContent='기초 '+k.basic[0]+'/'+k.basic[1]+' · 확률 '+k.prob[0]+'/'+k.prob[1]+' · 레인지 '+k.range[0]+'/'+k.range[1];
   document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
 }
 function renderGroups(hl){
@@ -671,7 +822,7 @@ function next(){
   q=generate(mode);answered=false;showQuestion();
 }
 function showQuestion(){
-  $('tag').textContent=(q.kind==='basic'?'기초':'확률')+' · '+q.type+(q.retryId?' · 오답 다시 풀기':'');$('tag').className='tag'+(q.kind==='prob'?' p':'');
+  $('tag').textContent=KIND_KO[q.kind]+' · '+q.type+(q.retryId?' · 오답 다시 풀기':'');$('tag').className='tag'+(q.kind==='prob'?' p':q.kind==='range'?' rg':'');
   $('prompt').textContent=q.prompt;renderGroups(null);
   $('choices').className='choices'+(q.choices.some(c=>c.length>14)?' one':'');
   $('choices').innerHTML=q.choices.map((c,i)=>'<button class="ch" data-i="'+i+'">'+esc(c)+'</button>').join('');
@@ -774,7 +925,7 @@ function renderWrong(){
   const v=$('vWrong');
   if(!wrong.length){v.innerHTML='<div class="empty">틀린 문제가 없어요. 퀴즈에서 틀리면 여기에 자동으로 모입니다.</div>';return}
   v.innerHTML='<div class="wtop"><span>틀린 문제 '+wrong.length+'개 · 다시 풀어서 맞히면 빠져요</span><button id="wClear" class="'+(clearArmed?'warn':'')+'">'+(clearArmed?'정말 모두 지울까요?':'모두 지우기')+'</button></div>'+
-   wrong.map((w,n)=>'<div class="paper wq"><div class="meta">'+(w.kind==='basic'?'기초':'확률')+' · '+esc(w.type)+' · '+new Date(w.time).toLocaleDateString('ko-KR')+(w.miss>1?' · '+w.miss+'번 틀림':'')+'</div>'+
+   wrong.map((w,n)=>'<div class="paper wq"><div class="meta">'+KIND_KO[w.kind]+' · '+esc(w.type)+' · '+new Date(w.time).toLocaleDateString('ko-KR')+(w.miss>1?' · '+w.miss+'번 틀림':'')+'</div>'+
      '<div class="q2">'+esc(w.prompt)+'</div>'+(w.groups.length?'<div class="mini">'+w.groups.map(g=>'<span>'+esc(g.label)+': '+cardTxt(g.cards)+'</span>').join('')+'</div>':'')+
      '<div class="ans">내 답: <span class="bad">'+esc(w.choices[w.picked])+'</span> · 정답: <span class="ok">'+esc(w.choices[w.answer])+'</span></div>'+
      '<details><summary>해설 보기</summary><p>'+fmtExplain(w.explain)+'</p></details>'+
@@ -797,21 +948,77 @@ function loadNotes(){
   x.onload=()=>{try{notes=JSON.parse(x.responseText);renderNotes()}catch(e){v.innerHTML='<div class="empty">노트 파일(notes.json)을 읽지 못했어요.</div>'}};
   x.onerror=()=>{v.innerHTML='<div class="empty">노트 파일(notes.json)을 찾지 못했어요.</div>'};x.send();
 }
+function rangeGrid(set){
+  let h='<div class="rgrid">';
+  for(let i=12;i>=0;i--)for(let j=12;j>=0;j--){const code=i===j?RK[i]+RK[i]:i>j?RK[i]+RK[j]+'s':RK[j]+RK[i]+'o';h+='<span class="'+(set.has(code)?'in':'')+'">'+code+'</span>'}
+  return h+'</div><p style="font-size:13px;color:#5b6d62">위 오른쪽 삼각형은 수딧(s), 왼쪽 아래는 오프수트(o), 대각선은 포켓 페어. 진한 칸이 오픈. T는 10입니다.</p>';
+}
 function renderNotes(){
   const S=notes.sections||[];
   $('vNotes').innerHTML='<div class="secnav">'+S.map((s,i)=>'<a href="#" data-s="'+i+'">'+esc(s.title)+'</a>').join('')+'</div>'+
    S.map((s,i)=>'<details class="paper" id="ns'+i+'"'+(i===0?' open':'')+'><summary>'+esc(s.title)+'</summary>'+(s.items||[]).map(it=>
-     '<h3>'+esc(it.h||'')+'</h3>'+(it.body?'<p>'+fmtExplain(it.body)+'</p>':'')+
+     '<h3>'+esc(it.h||'')+'</h3>'+(it.body?'<p>'+fmtExplain(it.body)+'</p>':'')+(it.grid&&RSET[it.grid]?rangeGrid(RSET[it.grid]):'')+
      (it.table?'<div class="tscroll"><table><thead><tr>'+it.table[0].map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+
        it.table.slice(1).map(r=>'<tr>'+r.map(c=>'<td>'+fmtExplain(String(c))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'')).join('')+'</details>').join('');
 }
 $('vNotes').addEventListener('click',e=>{const a=e.target.closest('.secnav a');if(!a)return;e.preventDefault();const d=$('ns'+a.dataset.s);d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'})});
+// ---- 기록 (세션, 틸트, 뱅크롤)
+let lg={sessions:[],bk:{}};try{const x=JSON.parse(localStorage.getItem('hq-log'));if(x&&x.sessions)lg=x}catch(e){}
+const saveLog=()=>{try{localStorage.setItem('hq-log',JSON.stringify(lg))}catch(e){}};
+const won=v=>(v<0?'−':'+')+Math.abs(Math.round(v)).toLocaleString('ko-KR');
+let tiltSel=0;
+function renderBk(){
+  const a=+$('bkAmt').value,b=+$('bkBuy').value,t=$('bkType').value;lg.bk={a:$('bkAmt').value,b:$('bkBuy').value,t};saveLog();
+  if(!a||!b){$('bkOut').innerHTML='뱅크롤과 바이인 금액을 넣으면 몇 바이인인지 계산해 드려요.';return}
+  const n=a/b,need=t==='cash'?[20,30]:[50,100];
+  const cls=n>=need[1]?'good':n>=need[0]?'warn':'bad';
+  $('bkOut').innerHTML='<span class="'+cls+'">바이인 '+(Math.round(n*10)/10)+'개</span> · 권장 '+(t==='cash'?'캐시 게임 최소 20개, 넉넉하게 30개 이상':'토너먼트 최소 50개, 넉넉하게 100개 이상')+
+    (cls==='bad'?'<br>지금 스테이크는 부담이 커요. 한 단계 낮은 스테이크를 고려해 보세요.':cls==='warn'?'<br>버틸 수는 있지만 연패가 오면 스테이크를 낮추세요.':'<br>지금 스테이크에서 안정적으로 플레이할 수 있어요.');
+}
+function renderLog(){
+  if(lg.bk&&!$('bkAmt').value){$('bkAmt').value=lg.bk.a||'';$('bkBuy').value=lg.bk.b||'';$('bkType').value=lg.bk.t||'cash'}
+  if(!$('lgDate').value)$('lgDate').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  renderBk();
+  const S=lg.sessions,tot=S.reduce((a,x)=>a+x.out-x.in,0),hrs=S.reduce((a,x)=>a+(+x.hrs||0),0);
+  const tc=S.filter(x=>x.tilt),avgT=tc.length?tc.reduce((a,x)=>a+x.tilt,0)/tc.length:0;
+  const calm=S.filter(x=>x.tilt&&x.tilt<=2),hot=S.filter(x=>x.tilt>=4);
+  const avg=a=>a.length?a.reduce((n,x)=>n+x.out-x.in,0)/a.length:null;
+  const cls=v=>v>=0?'plus':'minus';
+  $('lgSum').innerHTML='<h2>요약</h2>'+(S.length?'<div class="sumg">'+
+    '<div><b class="'+cls(tot)+'">'+won(tot)+'</b><small>총 손익</small></div>'+
+    '<div><b>'+S.length+'</b><small>세션</small></div>'+
+    '<div><b>'+(Math.round(hrs*10)/10)+'</b><small>총 시간</small></div>'+
+    '<div><b class="'+cls(tot)+'">'+(hrs?won(tot/hrs):'-')+'</b><small>시간당</small></div>'+
+    '<div><b>'+(avgT?avgT.toFixed(1):'-')+'</b><small>평균 틸트</small></div>'+
+    '<div><b>'+S.filter(x=>x.out>x.in).length+'/'+S.length+'</b><small>이긴 세션</small></div></div>'+
+    (calm.length&&hot.length?'<p style="margin-top:10px">평온할 때(틸트 1~2) 세션당 <b class="'+cls(avg(calm))+'">'+won(avg(calm))+'</b>, 흥분했을 때(4~5) 세션당 <b class="'+cls(avg(hot))+'">'+won(avg(hot))+'</b></p>':'<p style="margin-top:10px">틸트 정도를 꾸준히 적으면 평온할 때와 흥분했을 때의 손익을 비교해 드려요.</p>')
+    :'<p>아직 기록이 없어요. 세션이 끝나면 위에 적어 주세요.</p>');
+  $('lgList').innerHTML=S.map((x,n)=>'<div class="paper sess"><div><b>'+esc(x.date)+'</b> · '+(x.type==='mtt'?'토너먼트':'캐시')+(x.stake?' · '+esc(x.stake):'')+
+    '<br><small>'+(x.hrs?x.hrs+'시간 · ':'')+(x.tilt?'틸트 '+x.tilt:'')+'</small>'+(x.memo?'<p style="font-size:14px;margin-top:4px">'+esc(x.memo)+'</p>':'')+
+    '</div><div style="text-align:right"><div class="amt '+cls(x.out-x.in)+'">'+won(x.out-x.in)+'</div><button data-del="'+n+'">삭제</button></div></div>').join('');
+}
+['bkAmt','bkBuy','bkType'].forEach(id=>$(id).addEventListener('input',renderBk));
+$('lgTilt').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tiltSel=+b.dataset.t;document.querySelectorAll('#lgTilt button').forEach(x=>x.classList.toggle('on',x===b))});
+$('lgSave').addEventListener('click',()=>{
+  const inn=parseFloat($('lgIn').value),out=parseFloat($('lgOut').value);
+  if(isNaN(inn)||isNaN(out)){$('lgMsg').style.color='#c22d2d';$('lgMsg').textContent='들어간 돈과 가지고 나온 돈을 입력해 주세요.';return}
+  lg.sessions.unshift({date:$('lgDate').value,type:$('lgType').value,stake:$('lgStake').value.trim(),in:inn,out,hrs:parseFloat($('lgHrs').value)||0,tilt:tiltSel,memo:$('lgMemo').value.trim(),time:Date.now()});
+  saveLog();['lgIn','lgOut','lgHrs','lgMemo'].forEach(id=>$(id).value='');tiltSel=0;document.querySelectorAll('#lgTilt button').forEach(x=>x.classList.remove('on'));
+  $('lgMsg').style.color='';$('lgMsg').textContent='저장했어요. 수고하셨어요!';renderLog();setTimeout(()=>$('lgMsg').textContent='',3000);
+});
+$('lgList').addEventListener('click',e=>{const b=e.target.closest('button[data-del]');if(!b)return;
+  if(b.dataset.armed){lg.sessions.splice(+b.dataset.del,1);saveLog();renderLog()}else{b.dataset.armed='1';b.textContent='정말 삭제?';b.style.background='#ee5a5a';b.style.color='#fff'}});
+$('bkCopy').addEventListener('click',()=>{const t=JSON.stringify({log:lg,wrong,stats:st});$('bkText').value=t;$('bkText').select();
+  try{navigator.clipboard.writeText(t).then(()=>$('bkMsg').textContent='복사했어요. 메모 앱 등에 붙여넣어 보관하세요.',()=>$('bkMsg').textContent='위 내용을 길게 눌러 복사하세요.')}catch(e){$('bkMsg').textContent='위 내용을 길게 눌러 복사하세요.'}});
+$('bkLoad').addEventListener('click',()=>{try{const x=JSON.parse($('bkText').value);if(!x.log||!x.log.sessions)throw 0;lg=x.log;saveLog();if(Array.isArray(x.wrong)){wrong=x.wrong;saveWrong()}if(x.stats&&x.stats.k){st=x.stats;if(!st.k.range)st.k.range=[0,0];save();renderScore()}
+  $('bkMsg').style.color='';$('bkMsg').textContent='복원했어요.';$('bkAmt').value='';renderLog()}catch(e){$('bkMsg').style.color='#c22d2d';$('bkMsg').textContent='백업 내용이 올바르지 않아요.'}});
 // ---- 화면 전환
 let view='quiz';
 function setView(v){
   view=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
-  $('vQuiz').hidden=v!=='quiz';$('vNotes').hidden=v!=='notes';$('vWrong').hidden=v!=='wrong';
-  $('modes').style.visibility=v==='quiz'?'':'hidden';
+  $('vQuiz').hidden=v!=='quiz';$('vNotes').hidden=v!=='notes';$('vWrong').hidden=v!=='wrong';$('vLog').hidden=v!=='log';
+  if(v==='log')renderLog();
+  $('modes').style.display=v==='quiz'?'':'none';
   if(v!=='quiz'&&V.on){vStop();micState('퀴즈 화면으로 돌아오면 말하기 버튼을 눌러 주세요')}
   if(v==='notes')loadNotes();if(v==='wrong'){clearArmed=false;renderWrong()}
   window.scrollTo({top:0});
@@ -821,7 +1028,7 @@ saveWrong();
 $('choices').addEventListener('click',e=>{const b=e.target.closest('.ch');if(b)choose(+b.dataset.i)});
 $('next').addEventListener('click',next);
 $('modes').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;save();renderScore();next()});
-$('reset').addEventListener('click',()=>{st={c:0,t:0,streak:0,best:0,k:{basic:[0,0],prob:[0,0]}};save();renderScore()});
+$('reset').addEventListener('click',()=>{st={c:0,t:0,streak:0,best:0,k:{basic:[0,0],prob:[0,0],range:[0,0]}};save();renderScore()});
 document.addEventListener('keydown',e=>{if(view!=='quiz')return;if(e.key>='1'&&e.key<='4')choose(+e.key-1);else if((e.key==='Enter'||e.key===' ')&&answered){e.preventDefault();next()}});
 renderScore();next();
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
